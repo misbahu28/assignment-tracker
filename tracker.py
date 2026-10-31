@@ -1,0 +1,1 @@
+print("Assignment tracker is alive")
