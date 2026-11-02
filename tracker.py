@@ -23,24 +23,34 @@ def get_due_date(assignment):
     return assignment["due"]
 
 
-def list_assignments(week_only):
-    assignments = sorted(load_assignments(), key=get_due_date)
-    today = date.today()
+def days_until(assignment, today):
+    due = date.fromisoformat(assignment["due"])
+    return (due - today).days
 
-    print("Upcoming assignments")
-    print("--------------------")
-    shown = 0
-    for assignment in assignments:
-        due = date.fromisoformat(assignment["due"])
-        days_left = (due - today).days
+
+def filter_upcoming(assignments, today, week_only):
+    upcoming = []
+    for assignment in sorted(assignments, key=get_due_date):
+        days_left = days_until(assignment, today)
         if days_left < 0:
             continue
         if week_only and days_left > 7:
             continue
-        print(f"{assignment['course']}: {assignment['title']} - due {assignment['due']} ({days_left} days left)")
-        shown += 1
+        upcoming.append(assignment)
+    return upcoming
 
-    if shown == 0:
+
+def list_assignments(week_only):
+    today = date.today()
+    upcoming = filter_upcoming(load_assignments(), today, week_only)
+
+    print("Upcoming assignments")
+    print("--------------------")
+    for assignment in upcoming:
+        days_left = days_until(assignment, today)
+        print(f"{assignment['course']}: {assignment['title']} - due {assignment['due']} ({days_left} days left)")
+
+    if not upcoming:
         print("Nothing due. Nice!")
 
 
