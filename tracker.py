@@ -1,6 +1,7 @@
 import argparse
 import json
 import sys
+import canvas
 from datetime import date
 
 DATA_FILE = "assignments.json"
@@ -82,6 +83,15 @@ def done_assignment(title):
     save_assignments(remaining)
     print(f"Marked done: {title}")
 
+def sync_assignments():
+    try:
+        fetched = canvas.fetch_assignments()
+    except canvas.CanvasError as error:
+        print(f"Error: {error}")
+        sys.exit(1)
+
+    save_assignments(canvas.merge_synced(load_assignments(), fetched))
+    print(f"Synced {len(fetched)} assignments from Canvas.")
 
 def main():
     parser = argparse.ArgumentParser(description="Track your assignment deadlines.")
@@ -97,6 +107,8 @@ def main():
 
     done_parser = subparsers.add_parser("done", help="mark an assignment as done (removes it)")
     done_parser.add_argument("title", help="the assignment's title")
+    
+    subparsers.add_parser("sync", help="pull your upcoming assignments from Canvas")
 
     args = parser.parse_args()
 
@@ -106,6 +118,8 @@ def main():
         add_assignment(args.course, args.title, args.due)
     elif args.command == "done":
         done_assignment(args.title)
+    elif args.command == "sync":
+        sync_assignments()
 
 
 if __name__ == "__main__":

@@ -4,6 +4,8 @@ import pytest
 
 import tracker
 
+import canvas
+
 
 def sample_assignments():
     return [
@@ -70,3 +72,29 @@ def test_done_unknown_title_exits(tmp_path, monkeypatch):
     with pytest.raises(SystemExit):
         tracker.done_assignment("Nonexistent")
     assert titles(tracker.load_assignments()) == ["Lab"]
+
+def test_to_local_date_converts_utc_to_toronto():
+    assert canvas.to_local_date("2026-11-06T04:59:00Z") == "2026-11-05"
+
+
+def test_convert_assignment_skips_undated():
+    assert canvas.convert_assignment({"id": 1, "name": "X", "due_at": None}, "PROG 101") is None
+
+
+def test_convert_assignment_builds_our_format():
+    raw = {"id": 42, "name": "Lab 1", "due_at": "2026-11-06T04:59:00Z"}
+    assert canvas.convert_assignment(raw, "PROG 101") == {
+        "course": "PROG 101",
+        "title": "Lab 1",
+        "due": "2026-11-05",
+        "canvas_id": 42,
+    }
+
+
+def test_merge_keeps_manual_and_replaces_synced():
+    existing = [
+        {"course": "A", "title": "Manual", "due": "2026-12-01"},
+        {"course": "B", "title": "Old", "due": "2026-12-02", "canvas_id": 1},
+    ]
+    fetched = [{"course": "B", "title": "New", "due": "2026-12-03", "canvas_id": 2}]
+    assert titles(canvas.merge_synced(existing, fetched)) == ["Manual", "New"]
