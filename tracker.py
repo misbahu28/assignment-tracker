@@ -5,7 +5,7 @@ import canvas
 from datetime import date
 
 DATA_FILE = "assignments.json"
-
+DONE_FILE = "done.json"
 
 def load_assignments():
     try:
@@ -18,6 +18,18 @@ def load_assignments():
 def save_assignments(assignments):
     with open(DATA_FILE, "w") as file:
         json.dump(assignments, file, indent=2)
+
+def load_done_ids():
+    try:
+        with open(DONE_FILE) as file:
+            return set(json.load(file))
+    except FileNotFoundError:
+        return set()
+
+
+def save_done_ids(ids):
+    with open(DONE_FILE, "w") as file:
+        json.dump(sorted(ids), file)
 
 
 def get_due_date(assignment):
@@ -80,6 +92,14 @@ def done_assignment(title):
         print(f"Error: no assignment titled '{title}'. Run 'list' to see the titles.")
         sys.exit(1)
 
+    removed_ids = {
+        a["canvas_id"]
+        for a in assignments
+        if a["title"].lower() == title.lower() and "canvas_id" in a
+    }
+    if removed_ids:
+        save_done_ids(load_done_ids() | removed_ids)
+
     save_assignments(remaining)
     print(f"Marked done: {title}")
 
@@ -90,6 +110,7 @@ def sync_assignments():
         print(f"Error: {error}")
         sys.exit(1)
 
+    fetched = canvas.drop_finished(fetched, load_done_ids())
     save_assignments(canvas.merge_synced(load_assignments(), fetched))
     print(f"Synced {len(fetched)} assignments from Canvas.")
 

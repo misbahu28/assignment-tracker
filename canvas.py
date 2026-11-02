@@ -52,6 +52,9 @@ def merge_synced(existing, fetched):
     manual = [a for a in existing if "canvas_id" not in a]
     return manual + fetched
 
+def drop_finished(fetched, done_ids):
+    return [a for a in fetched if a["canvas_id"] not in done_ids]
+
 def clean_course_name(raw):
     parts = [part.strip() for part in raw.split(" - ")]
     if len(parts) > 1 and parts[0].isdigit():

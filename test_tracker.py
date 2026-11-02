@@ -103,3 +103,18 @@ def test_clean_course_name():
     assert canvas.clean_course_name("202609 - Physics I - PHY-1010U - 40363.202609.XLIST") == "PHY-1010U"
     assert canvas.clean_course_name("202609 - Engineering Comm. and Tech. - 46416") == "Engineering Comm. and Tech."
     assert canvas.clean_course_name("PROG 101") == "PROG 101"
+
+def test_drop_finished_removes_done_ids():
+    fetched = [
+        {"course": "X", "title": "A", "due": "2026-12-01", "canvas_id": 1},
+        {"course": "X", "title": "B", "due": "2026-12-02", "canvas_id": 2},
+    ]
+    assert titles(canvas.drop_finished(fetched, {1})) == ["B"]
+
+
+def test_done_remembers_canvas_ids(tmp_path, monkeypatch):
+    monkeypatch.setattr(tracker, "DATA_FILE", str(tmp_path / "test.json"))
+    monkeypatch.setattr(tracker, "DONE_FILE", str(tmp_path / "done.json"))
+    tracker.save_assignments([{"course": "X", "title": "Lab", "due": "2026-12-01", "canvas_id": 7}])
+    tracker.done_assignment("Lab")
+    assert tracker.load_done_ids() == {7}
