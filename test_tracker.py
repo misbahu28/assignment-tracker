@@ -50,3 +50,23 @@ def test_add_assignment_rejects_bad_date(tmp_path, monkeypatch):
     with pytest.raises(SystemExit):
         tracker.add_assignment("PROG 101", "Lab", "12/01")
     assert tracker.load_assignments() == []
+
+def test_remove_by_title_ignores_case():
+    result = tracker.remove_by_title(sample_assignments(), "soon")
+    assert titles(result) == ["Later", "Past"]
+
+
+def test_done_removes_from_file(tmp_path, monkeypatch):
+    monkeypatch.setattr(tracker, "DATA_FILE", str(tmp_path / "test.json"))
+    tracker.add_assignment("PROG 101", "Lab", "2026-12-01")
+    tracker.add_assignment("MATH 102", "Quiz", "2026-12-02")
+    tracker.done_assignment("Lab")
+    assert titles(tracker.load_assignments()) == ["Quiz"]
+
+
+def test_done_unknown_title_exits(tmp_path, monkeypatch):
+    monkeypatch.setattr(tracker, "DATA_FILE", str(tmp_path / "test.json"))
+    tracker.add_assignment("PROG 101", "Lab", "2026-12-01")
+    with pytest.raises(SystemExit):
+        tracker.done_assignment("Nonexistent")
+    assert titles(tracker.load_assignments()) == ["Lab"]

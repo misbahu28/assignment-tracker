@@ -40,6 +40,10 @@ def filter_upcoming(assignments, today, week_only):
     return upcoming
 
 
+def remove_by_title(assignments, title):
+    return [a for a in assignments if a["title"].lower() != title.lower()]
+
+
 def list_assignments(week_only):
     today = date.today()
     upcoming = filter_upcoming(load_assignments(), today, week_only)
@@ -67,6 +71,18 @@ def add_assignment(course, title, due):
     print(f"Added: {course}: {title} (due {due})")
 
 
+def done_assignment(title):
+    assignments = load_assignments()
+    remaining = remove_by_title(assignments, title)
+
+    if len(remaining) == len(assignments):
+        print(f"Error: no assignment titled '{title}'. Run 'list' to see the titles.")
+        sys.exit(1)
+
+    save_assignments(remaining)
+    print(f"Marked done: {title}")
+
+
 def main():
     parser = argparse.ArgumentParser(description="Track your assignment deadlines.")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -79,12 +95,17 @@ def main():
     add_parser.add_argument("title", help="assignment name")
     add_parser.add_argument("due", help="due date as YYYY-MM-DD")
 
+    done_parser = subparsers.add_parser("done", help="mark an assignment as done (removes it)")
+    done_parser.add_argument("title", help="the assignment's title")
+
     args = parser.parse_args()
 
     if args.command == "list":
         list_assignments(args.week)
     elif args.command == "add":
         add_assignment(args.course, args.title, args.due)
+    elif args.command == "done":
+        done_assignment(args.title)
 
 
 if __name__ == "__main__":
