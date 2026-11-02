@@ -98,3 +98,8 @@ def test_merge_keeps_manual_and_replaces_synced():
     ]
     fetched = [{"course": "B", "title": "New", "due": "2026-12-03", "canvas_id": 2}]
     assert titles(canvas.merge_synced(existing, fetched)) == ["Manual", "New"]
+
+def test_clean_course_name():
+    assert canvas.clean_course_name("202609 - Physics I - PHY-1010U - 40363.202609.XLIST") == "PHY-1010U"
+    assert canvas.clean_course_name("202609 - Engineering Comm. and Tech. - 46416") == "Engineering Comm. and Tech."
+    assert canvas.clean_course_name("PROG 101") == "PROG 101"

@@ -5,6 +5,8 @@ from zoneinfo import ZoneInfo
 import requests
 from dotenv import load_dotenv
 
+import re
+
 BASE_URL = "https://learn.ontariotechu.ca"
 TIMEZONE = ZoneInfo("America/Toronto")
 
@@ -50,6 +52,16 @@ def merge_synced(existing, fetched):
     manual = [a for a in existing if "canvas_id" not in a]
     return manual + fetched
 
+def clean_course_name(raw):
+    parts = [part.strip() for part in raw.split(" - ")]
+    if len(parts) > 1 and parts[0].isdigit():
+        parts = parts[1:]
+    if len(parts) > 1 and re.fullmatch(r"\d+(\.\w+)*", parts[-1]):
+        parts = parts[:-1]
+    for part in parts:
+        if re.fullmatch(r"[A-Z]{3,4}-\d{4}U", part):
+            return part
+    return " - ".join(parts)
 
 def fetch_assignments():
     load_dotenv()
@@ -67,7 +79,9 @@ def fetch_assignments():
                 f"/api/v1/courses/{course['id']}/assignments", token, {"bucket": "upcoming"}
             )
             for assignment in assignments:
-                converted = convert_assignment(assignment, course["course_code"])
+                converted = convert_assignment(
+                    assignment, clean_course_name(course["course_code"])
+                )
                 if converted:
                     fetched.append(converted)
     except requests.RequestException as error:
