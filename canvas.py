@@ -7,6 +7,8 @@ from dotenv import load_dotenv
 
 import re
 
+import paths
+
 BASE_URL = "https://learn.ontariotechu.ca"
 TIMEZONE = ZoneInfo("America/Toronto")
 
@@ -67,6 +69,7 @@ def clean_course_name(raw):
     return " - ".join(parts)
 
 def fetch_assignments():
+    load_dotenv(paths.DATA_DIR / ".env")
     load_dotenv()
     token = os.getenv("CANVAS_TOKEN")
     if not token or token == "placeholder":

@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "assignment-tracker"
+version = "0.1.0"
+description = "Command-line tool that pulls upcoming deadlines from Canvas"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = ["requests", "python-dotenv", "tzdata"]
+
+[project.scripts]
+tracker = "tracker:main"
+
+[tool.setuptools]
+py-modules = ["tracker", "canvas", "paths"]

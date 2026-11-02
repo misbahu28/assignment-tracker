@@ -3,9 +3,11 @@ import json
 import sys
 import canvas
 from datetime import date
+from pathlib import Path
+import paths
 
-DATA_FILE = "assignments.json"
-DONE_FILE = "done.json"
+DATA_FILE = str(paths.DATA_DIR / "assignments.json")
+DONE_FILE = str(paths.DATA_DIR / "done.json")
 
 def load_assignments():
     try:
@@ -16,6 +18,7 @@ def load_assignments():
 
 
 def save_assignments(assignments):
+    Path(DATA_FILE).parent.mkdir(parents=True, exist_ok=True)
     with open(DATA_FILE, "w") as file:
         json.dump(assignments, file, indent=2)
 
@@ -28,6 +31,7 @@ def load_done_ids():
 
 
 def save_done_ids(ids):
+    Path(DONE_FILE).parent.mkdir(parents=True, exist_ok=True)
     with open(DONE_FILE, "w") as file:
         json.dump(sorted(ids), file)
 

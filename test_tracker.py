@@ -118,3 +118,8 @@ def test_done_remembers_canvas_ids(tmp_path, monkeypatch):
     tracker.save_assignments([{"course": "X", "title": "Lab", "due": "2026-12-01", "canvas_id": 7}])
     tracker.done_assignment("Lab")
     assert tracker.load_done_ids() == {7}
+
+def test_save_creates_missing_folder(tmp_path, monkeypatch):
+    monkeypatch.setattr(tracker, "DATA_FILE", str(tmp_path / "new_folder" / "test.json"))
+    tracker.save_assignments([])
+    assert tracker.load_assignments() == []

@@ -14,7 +14,7 @@ A command-line tool that pulls upcoming deadlines from Canvas and shows what's d
 ## Example
 
 ```
-$ python tracker.py list --week
+$ tracker list --week
 Upcoming assignments
 --------------------
 PROG-1000U: Lab 3 report - due 2026-11-05 (3 days left)
@@ -28,13 +28,15 @@ You'll need Python 3.9 or newer.
 ```
 git clone https://github.com/misbahu28/assignment-tracker.git
 cd assignment-tracker
-python -m pip install -r requirements.txt
+python -m pip install -e .
 ```
+
+This installs the `tracker` command.
 
 ### Connecting to Canvas
 
 1. In Canvas, go to Account > Settings > Approved Integrations and create a new access token.
-2. Copy `.env.example` to a new file named `.env` and paste your token in:
+2. Create a file named `.env` in the tool's data folder (`~/.assignment-tracker/`) containing:
 
 ```
 CANVAS_TOKEN=your_token_here
@@ -42,17 +44,17 @@ CANVAS_TOKEN=your_token_here
 
 3. Edit `BASE_URL` in `canvas.py` if your school uses a different Canvas address (it's currently set to Ontario Tech's).
 
-The `.env` file is ignored by Git, so your token is never uploaded.
+Your data and token stay on your computer and are never part of the repository.
 
 ## Usage
 
 ```
-python tracker.py sync
-python tracker.py list
-python tracker.py list --week
-python tracker.py add "PROG-1000U" "Lab 4" 2026-11-20
-python tracker.py done "Lab 4"
-python tracker.py --help
+tracker sync
+tracker list
+tracker list --week
+tracker add "PROG-1000U" "Lab 4" 2026-11-20
+tracker done "Lab 4"
+tracker --help
 ```
 
 ## Running the tests
